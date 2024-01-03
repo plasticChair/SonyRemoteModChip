@@ -13,12 +13,12 @@
 
 
 #define T_output 4
-#define R_TP63 0
+#define R_TP63 2
 #define G_TP12 1
 #define B_TP64 3
 
-#define WAKE_UP_INT PCINT0
-#define R_TP63_INT PCINT0
+#define WAKE_UP_INT PCINT2
+#define R_TP63_INT PCINT2
 #define B_TP64_INT PCINT3
 
 
@@ -27,6 +27,7 @@ typedef enum  { ARM,
             TRIGGERED_WAKE,
             TIMER_WAKE,
             WAIT_COND,
+        WAIT_COND2,
             RESET
             } MODE_LIST;
 
@@ -96,11 +97,11 @@ int main(void) {
     
     // 100.16025641025641 Hz (1000000/((155+1)*64))
     // interrupt COMPA
-    OCR1A = OCR1C;
+    OCR1C = 180;
+    OCR1B = OCR1C;
     // CTC
     TCCR1 |= (1 << CTC1);
-    TCCR1 |= (1 << CS12) | (1 << CS11) | (1 << CS10);
-   // TCCR1 |= (1 << CS13) | (1 << CS12) | (0 << CS10); // 2048 prescaler
+    TCCR1 |= (1 << CS13) | (0 << CS12)  | (1 << CS11) | (1 << CS10); // 1024 prescaler
     TCNT1 = 0x00;
     
     // Output Compare Match A Interrupt Enable
@@ -130,8 +131,8 @@ int main(void) {
                     MCUCR &= ~((1 << ISC01) | (0 << ISC00)) ; // Low level int
                     GIMSK |= (1 << PCIE) | (1<< INT0) ; // Enable INT0 int and PC int
                     //GIMSK |=  (1<< INT0) ; // Enable INT0 int and PC int
-                    PCMSK |= (1 << WAKE_UP_INT) ;
-                    //PCMSK |= (1 << R_TP63_INT) | (1 << B_TP64_INT) ;             
+                    //PCMSK |= (1 << WAKE_UP_INT) ;
+                    PCMSK |= (1 << R_TP63_INT) | (1 << B_TP64_INT) ;             
                      sei();
                      MODE = WAIT;
                      // Fall through
@@ -159,25 +160,35 @@ int main(void) {
                     
             case WAIT_COND:
                 
-                 sampleGPIO();   
-                 if (checkHighs())
-                 {
-                     //Good, go back to sleep
-                     enable_PCINT();
-                 }
-                 
-                if (checkVolUp() | checkVolDown())
+                sampleGPIO();   
+                if (checkHighs())
                 {
-                    if (TCNT0 < 255)
-                    {
-                        resetTimer0();
-                        //Send CMD
-                        testPinOut(1); _delay_ms(3);   testPinOut(0);
-
-                    }
-                     enable_PCINT();
+                    //Good, go back to sleep
+                    enable_PCINT();
+                    MODE = WAIT_COND;
                 }
-                break;
+                else
+                {
+                   if (checkVolUp() | checkVolDown())
+                   {
+                       if (TCNT0 < 255)
+                       {
+                           resetTimer0();
+                           //Send CMD
+                           testPinOut(1); _delay_ms(3);   testPinOut(0);
+
+                       }
+                        enable_PCINT();
+                        MODE = WAIT_COND;
+                   }
+                   else
+                   {
+                        MODE = RESET;
+                   }
+                }
+                 break;
+                 
+
                  
             case TIMER_WAKE:
 
@@ -298,7 +309,7 @@ void enable_INT0()
     cli();
     GIMSK |= (1<< INT0) ; // Enable INT0 
     MCUCR &= ~((1 << ISC01) | (0 << ISC00)) ; // Low level int
-    PCMSK |= (1<< WAKE_UP_INT) ; // Enable  
+  //  PCMSK |= (1<< WAKE_UP_INT) ; // Enable  
     sei();
 }
 
@@ -306,7 +317,7 @@ void disable_INT0()
 {
     cli();
     GIMSK &= ~(1<< INT0) ; // Enable INT0 
-    PCMSK &= ~(1<< WAKE_UP_INT) ; // Enable  
+   // PCMSK &= ~(1<< WAKE_UP_INT) ; // Enable  
     sei();
 }
 
@@ -365,13 +376,15 @@ void testPinOut(int state)
 uint8_t checkVolUp()
 {
     return (   (sample_R_TP63 == 0)
-            && (sample_G_TP12 == 0));
+            && (sample_G_TP12 == 0)
+            && (sample_B_TP64 == 1));
 }
 
 uint8_t checkVolDown()
 {
-    return (   (sample_B_TP64 == 0)
-             && (sample_G_TP12 == 0));
+    return (   (sample_R_TP63 == 1)
+             && (sample_G_TP12 == 0)
+            && (sample_B_TP64 == 0));
 }
 
 uint8_t checkHighs()
