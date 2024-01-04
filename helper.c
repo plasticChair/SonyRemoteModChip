@@ -17,7 +17,7 @@ uint8_t sample_G_TP12 = 0;
 uint8_t sample_B_TP64 = 0;
 
 #define DATA_SIZE 4
-uint8_t volUpMsg[DATA_SIZE]   = {0xF5,0xAB,0x55,0x56};
+uint8_t volUpMsg[DATA_SIZE]   = {0xEB,0x56,0xAA,0xAC};
 uint8_t volDownMsg[DATA_SIZE] = {0xED,0xAB,0x55,0x56};
 
 
@@ -80,6 +80,7 @@ void setModeStop()
     stopFlag = 1;
     IR_MODE = WAIT_IR;
 }
+
 uint8_t getRunningMode()
 {
     return runningFlag;
@@ -159,6 +160,7 @@ uint8_t sendingSM()
     {
         case WAIT_IR:
             runningFlag = 0;
+            testPinOut(1); testPinOut(0);
             return 1;
             break;
             
@@ -171,9 +173,14 @@ uint8_t sendingSM()
             startTimer1();
             BURST_CHANGE = 0;
             setIRCnt(0);
-            IR_MODE = NEXT_BYTE;
+            IR_MODE = START_BIT;
             data_byte_idx = 0;
             /*Fall through*/
+            
+        case START_BIT:
+            setIRHigh();
+            IR_MODE = NEXT_BYTE;
+            break;
 
         case NEXT_BYTE:
            // Check if reached end of data

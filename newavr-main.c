@@ -45,17 +45,19 @@ int main(void) {
             {
                 case ARM:
                         // Interrupt Setup 
-                        
                         enable_PCINT();  //sei()
                         MODE = WAIT;
-   
                          /* Fall through */
 
                 case WAIT:
                         // Power down until button press
-                               
+                           testPinOut(1); _delay_us(130);testPinOut(0);
+
+        
                         sleepModePowerDown();
-           
+                         testPinOut(1);  _delay_us(160);testPinOut(0);
+   
+        
 
                         if (MODE != TIMER_WAKE){
                             MODE = WAIT_COND;
@@ -73,7 +75,7 @@ int main(void) {
                         
                         if (checkVolUp() || checkVolDown())
                         {
-                           // startTimeout();
+                            startTimeout();
                             MODE = WAIT_COND;
                         }
                         else
@@ -87,43 +89,28 @@ int main(void) {
                     sampleGPIO();   
                     if (checkHighs()){  // PCINT wakes up on rising edge :(.  Need to ignore it
                         MODE = WAIT_COND;
-                        testPinOut(1); testPinOut(0);
-                        testPinOut(1); testPinOut(0);
-                        
+                        startTimeout();
                         break;
                     }
                     else
                     { // Check if buttons were pressed
                        if (checkVolUp() | checkVolDown()){
-                           testPinOut(1); testPinOut(0);
-                           testPinOut(1); testPinOut(0);
-                           testPinOut(1); testPinOut(0);
                      
                             startTimeout();
                             //Send CMD
-      //------------------------  
                             if (getRunningMode() == 0)
                             {
-             
                                 sendCMD();
-                                
                                 MODE = SENDING;
-                                //setIRHigh();
                                 timerWakeCnt = 0;
-                                SM_flag = 1;
-        
+                                SM_flag      = 1;
                             }
-                           // MODE = WAIT_COND;
                             break;
                        }
                        else{
                            MODE = RESET;
                        } /* Fall Through */
                     }
-                            testPinOut(1); testPinOut(0);
-                           testPinOut(1); testPinOut(0);
-                            testPinOut(1); testPinOut(0);
-                           testPinOut(1); testPinOut(0);
 
                 case RESET:
                     stopTimer1();
@@ -132,7 +119,6 @@ int main(void) {
                     setModeStop();
                     setExecuteFlag();
                     
-                    //disable_PCINT();
                     disable_Timer0Int();
                     resetTimer0();
                     MODE = ARM;
@@ -149,8 +135,7 @@ int main(void) {
                     if (timerWakeCnt > 0){
                         //  Timeout occurred!
                         timerWakeCnt = 0;
-         
-                        SM_flag = 1;
+                        SM_flag      = 1;
                         MODE = RESET;
                     }
                     else{
@@ -159,7 +144,6 @@ int main(void) {
                     break;
 
                 case SENDING:
-
                         setModeRunning();
                         MODE = WAIT_COND;
                     break;
@@ -176,26 +160,24 @@ int main(void) {
             TMR1_Flag = 0;
 			IR_Cnt++;
 
-			 if (IR_Cnt >= 22)
+			 if (IR_Cnt >= 21)
 			 {
-				// PORTB ^= (1 << PB4);
 				 IR_Cnt = 0;
 				 BURST_CHANGE++;
 				 setExecuteFlag();
 			 }
 		}
-		 
         
         if (getExecuteFlag()){ // True if IR_MODE != WAIT_IR
             stat = sendingSM();
         }
-        
 
         if (  (MODE == WAIT_COND)
             && (getRunningMode() == 0)   )
         {
-           // testPinOut(1); _delay_us(95);testPinOut(0);
+            testPinOut(1); _delay_us(95);testPinOut(0);
             sleepModeIdle();
+            testPinOut(1); _delay_us(115);testPinOut(0);
         }
     }
 }
@@ -211,10 +193,11 @@ ISR(PCINT0_vect) {
 ISR (TIMER0_OVF_vect)      //Interrupt vector for Timer0/Counter0
 {
     PREV_MODE = MODE;
-    MODE = TIMER_WAKE;    
+    MODE = TIMER_WAKE;  
+    testPinOut(1); testPinOut(0);
+            testPinOut(1); testPinOut(0);
+            testPinOut(1); testPinOut(0);
     SM_flag = 1;
-	
-
 }
 
 ISR(TIMER1_OVF_vect)

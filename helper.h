@@ -22,6 +22,7 @@
 typedef enum {
             WAIT_IR,
             ASSIGN,
+            START_BIT,
             NEXT_BYTE,
             NEXT_BIT,
             DATA_OUT,
