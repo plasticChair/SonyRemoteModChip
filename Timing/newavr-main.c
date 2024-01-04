@@ -4,21 +4,30 @@
  *
  * Created on December 30, 2023, 9:47 PM
  */
-#define F_CPU 4000000
-
+#define F_CPU 1000000
 #include <avr/sleep.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
 
-#include "perif_control.h"
+
+
+#define T_output 4
+#define R_TP63 2
+#define G_TP12 1
+#define B_TP64 3
+
+#define WAKE_UP_INT PCINT2
+#define R_TP63_INT PCINT2
+#define B_TP64_INT PCINT3
+
 
 typedef enum  { ARM,
             WAIT,
             TRIGGERED_WAKE,
             TIMER_WAKE,
             WAIT_COND,
-             WAIT_COND2,
+        WAIT_COND2,
             RESET
             } MODE_LIST;
 
@@ -42,7 +51,7 @@ volatile uint8_t OUTPUT_STATE = 0;
 volatile uint8_t timerWakeCnt = 0;
 volatile MODE_LIST PREV_MODE = RESET;
 volatile MODE_LIST MODE = ARM;
-volatile uint8_t wake_flag = 0;
+
 // Prototypes
 void sleepModeIdle();
 void sleepModePowerDown();
@@ -56,6 +65,7 @@ void disable_PCINT();
 void startTimeout();
 void resetTimer0();
 void disable_Timer0Int();
+void wakeup_toggle(int *source);
 void testPinOut(int state);
 void startToggle();
 
@@ -69,14 +79,41 @@ int main(void) {
     
     //Define Ins/outs
     cli();
+    DDRB = 0;// (0 << PB3) | (0 << PB3) | (0 << PB3);
+    DDRB |= (1 << T_output);
+  
+    //PRR ? Power Reduction Register
+    //---
+     //  ADCSRA |= _BV(ADEN); ADC ON
     
-    setClock();
-    setGPIO();
-    setPowerSavings();
-
-    setTimer0();
-
+    //-------------------------------//
+    // Timer 0
+    TCCR0A = 0X00;         //TCCR0A to low for normal port operation and mode 0.
+    TCCR0B = 0X00;         //WGM02=0
+    TCCR0B |= (1<<CS02) | (0<<CS00);   //100 =  256 prescaler (about 62ms)
+    TCNT0 = 0x00;          //initializing the counter to 0
+    // Timer should overflow after 65ms @ 1MHz
     
+    
+    // 100.16025641025641 Hz (1000000/((155+1)*64))
+    // interrupt COMPA
+    OCR1C = 180;
+    OCR1B = OCR1C;
+    // CTC
+    TCCR1 |= (1 << CTC1);
+    TCCR1 |= (1 << CS13) | (0 << CS12)  | (1 << CS11) | (1 << CS10); // 1024 prescaler
+    TCNT1 = 0x00;
+    
+    // Output Compare Match A Interrupt Enable
+    //TIMSK |= (1 << OCIE1A);
+    //TIMSK|=(1<<TOIE0) | (1<<TOIE1); //enabling timer0/1 interrupt
+    
+
+    // Sample Pins
+
+  
+    
+    /* Replace with your application code */
     startToggle();
     
     timer0_wake = 0;
@@ -86,23 +123,23 @@ int main(void) {
     
     while (1) 
     {
-
         switch (MODE)
         {
             case ARM:
                     // Interrupt Setup 
-                    armWakeUpInt();
-                    enable_PCINT();
-                    sei();
-                    MODE = WAIT;
+                    
+                    MCUCR &= ~((1 << ISC01) | (0 << ISC00)) ; // Low level int
+                    GIMSK |= (1 << PCIE) | (1<< INT0) ; // Enable INT0 int and PC int
+                    //GIMSK |=  (1<< INT0) ; // Enable INT0 int and PC int
+                    //PCMSK |= (1 << WAKE_UP_INT) ;
+                    PCMSK |= (1 << R_TP63_INT) | (1 << B_TP64_INT) ;             
+                     sei();
+                     MODE = WAIT;
                      // Fall through
                 
             case WAIT:
                     sleepModePowerDown();
-                    if (MODE != TIMER_WAKE)
-                        MODE = TRIGGERED_WAKE;
-                    else
-                        break;
+                    MODE = TRIGGERED_WAKE;
                     // Fall through
 
             case TRIGGERED_WAKE:
@@ -110,7 +147,6 @@ int main(void) {
                     sampleGPIO();
                     if (checkVolUp() || checkVolDown())
                     {
-  //--------------------
                         testPinOut(1); testPinOut(0);
                         startTimeout();
                         enable_PCINT();
@@ -122,29 +158,6 @@ int main(void) {
                     }
                     break;
                     
-            case TIMER_WAKE:
-                timerWakeCnt++;
-                testPinOut(1); testPinOut(0);
-                testPinOut(1); testPinOut(0);
-                                testPinOut(1); testPinOut(0);
-                testPinOut(1); testPinOut(0);
-                                testPinOut(1); testPinOut(0);
-                testPinOut(1); testPinOut(0);
-                
-                if (timerWakeCnt > 0)
-                {
-
-                    timerWakeCnt = 0;
-                    MODE = RESET;
-                    //set_skip_sleep()
-                }
-                else
-                {
-                    MODE = PREV_MODE;
-                }
-
-                break;
-            
             case WAIT_COND:
                 
                 sampleGPIO();   
@@ -152,10 +165,7 @@ int main(void) {
                 {
                     //Good, go back to sleep
                     enable_PCINT();
-                    testPinOut(1); _delay_ms(1);   testPinOut(0);
-                    testPinOut(1);  testPinOut(0);
                     MODE = WAIT_COND;
-                     break;
                 }
                 else
                 {
@@ -165,23 +175,37 @@ int main(void) {
                        {
                            resetTimer0();
                            //Send CMD
-     //------------------------  
-                           timerWakeCnt = 0;
                            testPinOut(1); _delay_ms(3);   testPinOut(0);
 
                        }
                         enable_PCINT();
-                       //sei();
                         MODE = WAIT_COND;
-                         break;
                    }
                    else
                    {
                         MODE = RESET;
                    }
                 }
-                
+                 break;
+                 
 
+                 
+            case TIMER_WAKE:
+
+                timerWakeCnt++;
+
+                
+                if (timerWakeCnt > 0)
+                {
+                    timerWakeCnt = 0;
+                    MODE = RESET;
+                }
+                else
+                {
+                    MODE = PREV_MODE;
+                }
+                break;
+                
             case RESET:
                 
                 enable_INT0();
@@ -189,7 +213,6 @@ int main(void) {
                 disable_Timer0Int();
                 resetTimer0();
                 MODE = ARM;
-//--//-//-//--- 
                 testPinOut(1); _delay_ms(6);   testPinOut(0);
                  _delay_ms(6);   testPinOut(1);
                  _delay_ms(6);   testPinOut(0);
@@ -203,19 +226,13 @@ int main(void) {
 
         if (MODE == WAIT_COND)
         {
- //--//---  testPinOut(1); testPinOut(0);
+            testPinOut(1); testPinOut(0);
             testPinOut(1); testPinOut(0);
             testPinOut(1); testPinOut(0);
             sleepModeIdle();
             testPinOut(1); testPinOut(0);
             testPinOut(1); testPinOut(0);
             testPinOut(1); testPinOut(0);
-        }
-        
-        if (wake_flag == 1)
-        {
-            wake_flag =0;
-
         }
 
         
@@ -249,7 +266,6 @@ ISR(INT0_vect) {
 
 ISR (TIMER0_OVF_vect)      //Interrupt vector for Timer0/Counter0
 {
-   // wake_flag = 1;
     PREV_MODE = MODE;
     MODE = TIMER_WAKE;    
 }
@@ -384,7 +400,20 @@ void sampleGPIO()
     sample_B_TP64 = (PINB & (1 << B_TP64)) >> B_TP64; //digitalRead(B_TP64);
 }
 ///////////////////
+void wakeup_toggle(int *source)
+{
+    if (*source == 1){
+        *source = 0;
+        OUTPUT_STATE = !OUTPUT_STATE;
 
+        if (OUTPUT_STATE){
+            PORTB &= ~(1 << T_output);       // LED off
+        }
+        else{
+            PORTB |=  (1 << T_output);       // LED on
+        }            
+    }
+}
 void startToggle()
 {
         testPinOut(0);

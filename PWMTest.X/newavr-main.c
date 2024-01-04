@@ -13,16 +13,20 @@
 void startTimer1();
 void stopTimer1();
 
-#define DATA_SIZE 3
+#define DATA_SIZE 4
+
 typedef enum {
             ASSIGN,
             NEXT_BYTE,
             NEXT_BIT,
             DATA_OUT,
+            LOGIC_LOW,
+            LOGIC_HIGH,
 }IR_MODE_LIST;
 
 IR_MODE_LIST IR_MODE = ASSIGN;
     
+uint8_t select_cnt = 0;
     
 volatile uint8_t STATE = 0;
 volatile uint8_t STATE2 = 0;
@@ -52,20 +56,32 @@ int main(void) {
      
     TCNT1 = 0;
     
-    OCR1A = 12;
+    OCR1A = 8;
     OCR1B = 5;
-    OCR1C = 25;
+    OCR1C = 26;
             
     TIMSK = (1 << OCIE1A) | (1 << TOIE1); //| (1 << OCIE1B)
     
     sei();
 
-    uint8_t data[DATA_SIZE] = {0x00,0xFF,0x00};
+    
+    // Need to invert
+    // Vol Up
+    //1111 0101 1010 1011 0101 0101 0101 0111 - 0xF5AB 5557
+    //1000 0101 0010 1010 0101 0101 0101 0100 - 852A5554
+      uint8_t data2[DATA_SIZE] = {0x7a,0xd5,0xaa,0xab};
+
+            
+    // Vol Down
+    //1111 0110 1010 1011 0101 0101 0101 0111 - 0xF6AB 5557
+    //1000 0110 0010 1010 0101 0101 0101 0100 - 862A5554
+       uint8_t data[DATA_SIZE] = {0xF6,0xd5,0xaa,0xab};
+     
     uint8_t curr_byte = 0;
     uint8_t curr_bit = 0;
     
     uint8_t data_byte_idx = 0;
-    uint8_t data_bit_idx = 0;
+    int8_t data_bit_idx = 0;
     uint8_t Low_Length = 0;
     
     _delay_ms(1);
@@ -85,47 +101,69 @@ int main(void) {
             {
                 case ASSIGN:
                     IR_MODE = NEXT_BYTE;
+                     DDRB &= ~(1 << PB1); // LOW
                     data_byte_idx = 0;
+                    select_cnt++;
+                    if ((select_cnt  == 50))
+                    {
+                        _delay_ms(900);
+                    }
+                    
+                    if (select_cnt >= 100)
+                    {
+                         _delay_ms(900);
+                         select_cnt = 0;
+                    }
                     /*Fall through*/
                     
                 case NEXT_BYTE:
                    // Check if reached end of data
-                     PORTB |=  (1 << PB2);
-                     PORTB |=  (1 << PB2);
+                     PORTB ^=  (1 << PB2);
+                     PORTB ^=  (1 << PB2);
                     if (data_byte_idx > (DATA_SIZE-1)){
+                        DDRB &= ~(1 << PB1); // LOW
                         data_byte_idx = 0;
                         IR_MODE       = ASSIGN;
+                        _delay_ms(8);
                         break;
                     }
                     else{
                         // Grab selected byte
-                        curr_byte = data[data_byte_idx];
+                        if ((select_cnt  > 50))
+                        {
+                            curr_byte = data[data_byte_idx];
+                        }
+                        else
+                        {
+                            curr_byte = data2[data_byte_idx];
+                        }
+                        
                         data_byte_idx++;
                     }
                     BURST_CHANGE = 0;
-                    data_bit_idx = 0;
+                    data_bit_idx = 7;
                     IR_MODE      = NEXT_BIT;
                     /*Fall through*/
                     
                 case NEXT_BIT:
                     // Check if all 8 bits are done
-                    PORTB |=  (1 << PB4);
-                    PORTB |=  (1 << PB4);
-                    if (data_bit_idx >= 8){
-                                                IR_MODE = NEXT_BYTE;
+                    PORTB ^=  (1 << PB4);
+                    PORTB ^=  (1 << PB4);
+                    if (data_bit_idx < 0){
+                        IR_MODE = NEXT_BYTE;
                         timer1_flag  = 1; // Force Loop again
                         break;
                     }
                     else{
                         // Get single bit
                         curr_bit = (curr_byte >> data_bit_idx) & 1;
-                        data_bit_idx++;
+                        data_bit_idx--;
                         
                         if (curr_bit == 1){
-                            Low_Length = 4;
+                            IR_MODE = LOGIC_HIGH;
                         }
                         else{
-                            Low_Length = 1;
+                            IR_MODE = LOGIC_LOW;
                         }
                     }
 
@@ -134,11 +172,30 @@ int main(void) {
                     IR_Cnt       = 0;
                     stopTimer1();
                     startTimer1();
-                    IR_MODE = DATA_OUT;  // AKA Default state
-                    /*Fall through*/
+                    timer1_flag  = 1; // Force Loop again
+                    //IR_MODE = DATA_OUT;  // AKA Default state
+                    break;
+                    
+                case LOGIC_HIGH:
+                    //OUT HIGH
+                    DDRB |= (1 << PB1);
+                     IR_MODE = NEXT_BIT;
+                    break;
+                    
+                case LOGIC_LOW:
+                    
+                    //OUT LOW
+                    DDRB &= ~(1 << PB1);
+                    
+                     IR_MODE = NEXT_BIT;
+                    break;
+                    
+                    
+                    
                     
                case DATA_OUT:
-                   
+                    PORTB ^=  (1 << PB0);
+                    PORTB ^=  (1 << PB0);
                    if (BURST_CHANGE == 0){
                         //OUT HIGH
                          DDRB |= (1 << PB1);
@@ -150,6 +207,7 @@ int main(void) {
                     else{
                          IR_MODE = NEXT_BIT;
                     }
+                   break;
                     
                 default:
                     break;
@@ -180,7 +238,7 @@ ISR(TIMER1_OVF_vect)
    
     
     IR_Cnt++;
-    if (IR_Cnt >= 14)
+    if (IR_Cnt >= 21)
     {
         IR_Cnt = 0;
         BURST_CHANGE++;

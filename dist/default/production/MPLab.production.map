@@ -1,7 +1,7 @@
 Archive member included to satisfy reference by file (symbol)
 
 c:/program files/microchip/xc8/v2.45/avr/bin/../lib/gcc/avr/5.4.0/avr25/memx-const\libgcc.a(_copy_data.o)
-                              build/default/production/newavr-main.o (__do_clear_bss)
+                              build/default/production/newavr-main.o (__do_copy_data)
 c:/program files/microchip/xc8/v2.45/avr/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr25/memx-const\libc.a(exit.o)
                               C:/Program Files/Microchip/MPLABX/v6.15/packs/Microchip/ATtiny_DFP/3.0.151/xc8/avr/lib/avr25/memx-const/crtattiny45.o (exit)
 c:/program files/microchip/xc8/v2.45/avr/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr25/memx-const\libc.a(_Exit.o)
@@ -16,12 +16,40 @@ Discarded input sections
  .text          0x0000000000000000        0x0 build/default/production/newavr-main.o
  .data          0x0000000000000000        0x0 build/default/production/newavr-main.o
  .bss           0x0000000000000000        0x0 build/default/production/newavr-main.o
- .text.stopTimer1
+ .text.resetTimer0
                 0x0000000000000000        0x4 build/default/production/newavr-main.o
- .text.testPinOut
-                0x0000000000000000       0x36 build/default/production/newavr-main.o
- .bss.STATE2    0x0000000000000000        0x1 build/default/production/newavr-main.o
- .bss.STATE     0x0000000000000000        0x1 build/default/production/newavr-main.o
+ .bss.OUTPUT_STATE
+                0x0000000000000000        0x1 build/default/production/newavr-main.o
+ .bss.gpio_wake
+                0x0000000000000000        0x1 build/default/production/newavr-main.o
+ .bss.diffTime  0x0000000000000000        0x4 build/default/production/newavr-main.o
+ .bss.prevTime  0x0000000000000000        0x4 build/default/production/newavr-main.o
+ .bss.currTime  0x0000000000000000        0x4 build/default/production/newavr-main.o
+ .bss.vol_down_isr
+                0x0000000000000000        0x1 build/default/production/newavr-main.o
+ .bss.vol_up_isr
+                0x0000000000000000        0x1 build/default/production/newavr-main.o
+ .text          0x0000000000000000        0x0 build/default/production/perif_control.o
+ .data          0x0000000000000000        0x0 build/default/production/perif_control.o
+ .bss           0x0000000000000000        0x0 build/default/production/perif_control.o
+ .text          0x0000000000000000        0x0 build/default/production/helper.o
+ .data          0x0000000000000000        0x0 build/default/production/helper.o
+ .bss           0x0000000000000000        0x0 build/default/production/helper.o
+ .text.init_CntlParam
+                0x0000000000000000        0x6 build/default/production/helper.o
+ .text.set_skip_sleep
+                0x0000000000000000        0x8 build/default/production/helper.o
+ .bss.CntlParam
+                0x0000000000000000        0x1 build/default/production/helper.o
+ .debug_info    0x0000000000000000      0x2bd build/default/production/helper.o
+ .debug_abbrev  0x0000000000000000       0x73 build/default/production/helper.o
+ .debug_aranges
+                0x0000000000000000       0x28 build/default/production/helper.o
+ .debug_ranges  0x0000000000000000       0x18 build/default/production/helper.o
+ .debug_line    0x0000000000000000       0xa4 build/default/production/helper.o
+ .debug_str     0x0000000000000000        0x0 build/default/production/helper.o
+ .comment       0x0000000000000000       0x30 build/default/production/helper.o
+ .debug_frame   0x0000000000000000       0x34 build/default/production/helper.o
  .text          0x0000000000000000        0x0 c:/program files/microchip/xc8/v2.45/avr/bin/../lib/gcc/avr/5.4.0/avr25/memx-const\libgcc.a(_copy_data.o)
  .data          0x0000000000000000        0x0 c:/program files/microchip/xc8/v2.45/avr/bin/../lib/gcc/avr/5.4.0/avr25/memx-const\libgcc.a(_copy_data.o)
  .bss           0x0000000000000000        0x0 c:/program files/microchip/xc8/v2.45/avr/bin/../lib/gcc/avr/5.4.0/avr25/memx-const\libgcc.a(_copy_data.o)
@@ -85,6 +113,8 @@ Linker script and memory map
 LOAD C:/Program Files/Microchip/MPLABX/v6.15/packs/Microchip/ATtiny_DFP/3.0.151/xc8/avr/lib/avr25/memx-const/crtattiny45.o
                 0x0000000000000001                __MPLAB_BUILD = 0x1
 LOAD build/default/production/newavr-main.o
+LOAD build/default/production/perif_control.o
+LOAD build/default/production/helper.o
 START GROUP
 LOAD c:/program files/microchip/xc8/v2.45/avr/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr25/memx-const\libm.a
 END GROUP
@@ -195,7 +225,7 @@ END GROUP
 .rela.plt
  *(.rela.plt)
 
-.text           0x0000000000000000       0x74
+.text           0x0000000000000000       0x80
  *(.vectors)
  .vectors       0x0000000000000000       0x1e C:/Program Files/Microchip/MPLABX/v6.15/packs/Microchip/ATtiny_DFP/3.0.151/xc8/avr/lib/avr25/memx-const/crtattiny45.o
                 0x0000000000000000                __vector_default
@@ -203,44 +233,44 @@ END GROUP
  *(.vectors)
  *(.progmem.gcc*)
  *(.dinit)
- .dinit         0x000000000000001e        0x5 data_init
-                0x0000000000000024                . = ALIGN (0x2)
- *fill*         0x0000000000000023        0x1 
-                0x0000000000000024                __trampolines_start = .
+ .dinit         0x000000000000001e       0x11 data_init
+                0x0000000000000030                . = ALIGN (0x2)
+ *fill*         0x000000000000002f        0x1 
+                0x0000000000000030                __trampolines_start = .
  *(.trampolines)
- .trampolines   0x0000000000000024        0x0 linker stubs
+ .trampolines   0x0000000000000030        0x0 linker stubs
  *(.trampolines*)
-                0x0000000000000024                __trampolines_end = .
+                0x0000000000000030                __trampolines_end = .
  *libprintf_flt.a:*(.progmem.data)
  *libc.a:*(.progmem.data)
-                0x0000000000000024                . = ALIGN (0x2)
+                0x0000000000000030                . = ALIGN (0x2)
  *(.jumptables)
  *(.jumptables*)
  *(.lowtext)
  *(.lowtext*)
-                0x0000000000000024                __ctors_start = .
+                0x0000000000000030                __ctors_start = .
  *(.ctors)
-                0x0000000000000024                __ctors_end = .
-                0x0000000000000024                __dtors_start = .
+                0x0000000000000030                __ctors_end = .
+                0x0000000000000030                __dtors_start = .
  *(.dtors)
-                0x0000000000000024                __dtors_end = .
+                0x0000000000000030                __dtors_end = .
  SORT(*)(.ctors)
  SORT(*)(.dtors)
  *(.init0)
- .init0         0x0000000000000024        0x0 C:/Program Files/Microchip/MPLABX/v6.15/packs/Microchip/ATtiny_DFP/3.0.151/xc8/avr/lib/avr25/memx-const/crtattiny45.o
-                0x0000000000000024                __init
+ .init0         0x0000000000000030        0x0 C:/Program Files/Microchip/MPLABX/v6.15/packs/Microchip/ATtiny_DFP/3.0.151/xc8/avr/lib/avr25/memx-const/crtattiny45.o
+                0x0000000000000030                __init
  *(.init0)
  *(.init1)
  *(.init1)
  *(.init2)
- .init2         0x0000000000000024        0xc C:/Program Files/Microchip/MPLABX/v6.15/packs/Microchip/ATtiny_DFP/3.0.151/xc8/avr/lib/avr25/memx-const/crtattiny45.o
+ .init2         0x0000000000000030        0xc C:/Program Files/Microchip/MPLABX/v6.15/packs/Microchip/ATtiny_DFP/3.0.151/xc8/avr/lib/avr25/memx-const/crtattiny45.o
  *(.init2)
  *(.init3)
  *(.init3)
  *(.init4)
- .init4         0x0000000000000030       0x3c c:/program files/microchip/xc8/v2.45/avr/bin/../lib/gcc/avr/5.4.0/avr25/memx-const\libgcc.a(_copy_data.o)
-                0x0000000000000030                __do_copy_data
-                0x000000000000005e                __do_clear_bss
+ .init4         0x000000000000003c       0x3c c:/program files/microchip/xc8/v2.45/avr/bin/../lib/gcc/avr/5.4.0/avr25/memx-const\libgcc.a(_copy_data.o)
+                0x000000000000003c                __do_copy_data
+                0x000000000000006a                __do_clear_bss
  *(.init4)
  *(.init5)
  *(.init5)
@@ -251,12 +281,12 @@ END GROUP
  *(.init8)
  *(.init8)
  *(.init9)
- .init9         0x000000000000006c        0x4 C:/Program Files/Microchip/MPLABX/v6.15/packs/Microchip/ATtiny_DFP/3.0.151/xc8/avr/lib/avr25/memx-const/crtattiny45.o
+ .init9         0x0000000000000078        0x4 C:/Program Files/Microchip/MPLABX/v6.15/packs/Microchip/ATtiny_DFP/3.0.151/xc8/avr/lib/avr25/memx-const/crtattiny45.o
  *(.init9)
-                0x0000000000000070                . = ALIGN (0x2)
+                0x000000000000007c                . = ALIGN (0x2)
  *(.fini9)
- .fini9         0x0000000000000070        0x0 c:/program files/microchip/xc8/v2.45/avr/bin/../lib/gcc/avr/5.4.0/avr25/memx-const\libgcc.a(_exit.o)
-                0x0000000000000070                _exit
+ .fini9         0x000000000000007c        0x0 c:/program files/microchip/xc8/v2.45/avr/bin/../lib/gcc/avr/5.4.0/avr25/memx-const\libgcc.a(_exit.o)
+                0x000000000000007c                _exit
  *(.fini9)
  *(.fini8)
  *(.fini8)
@@ -275,11 +305,11 @@ END GROUP
  *(.fini1)
  *(.fini1)
  *(.fini0)
- .fini0         0x0000000000000070        0x4 c:/program files/microchip/xc8/v2.45/avr/bin/../lib/gcc/avr/5.4.0/avr25/memx-const\libgcc.a(_exit.o)
+ .fini0         0x000000000000007c        0x4 c:/program files/microchip/xc8/v2.45/avr/bin/../lib/gcc/avr/5.4.0/avr25/memx-const\libgcc.a(_exit.o)
  *(.fini0)
-                0x0000000000000074                _etext = .
+                0x0000000000000080                _etext = .
 
-.data           0x0000000000800060        0x0 load address 0x0000000000000074
+.data           0x0000000000800060        0x0 load address 0x0000000000000080
                 [!provide]                        PROVIDE (__data_start, .)
  *(.gnu.linkonce.d*)
  *(.gnu.linkonce.r*)
@@ -292,8 +322,8 @@ END GROUP
                 [!provide]                        PROVIDE (__bss_start, .)
  *(COMMON)
                 [!provide]                        PROVIDE (__bss_end, .)
-                0x0000000000000074                __data_load_start = LOADADDR (.data)
-                0x0000000000000074                __data_load_end = (__data_load_start + SIZEOF (.data))
+                0x0000000000000080                __data_load_start = LOADADDR (.data)
+                0x0000000000000080                __data_load_end = (__data_load_start + SIZEOF (.data))
 
 .noinit         0x0000000000800060        0x0
                 [!provide]                        PROVIDE (__noinit_start, .)
@@ -345,6 +375,7 @@ END GROUP
  *(.comment)
  .comment       0x0000000000000000       0x2f build/default/production/newavr-main.o
                                          0x30 (size before relaxing)
+ .comment       0x000000000000002f       0x30 build/default/production/perif_control.o
  .comment       0x000000000000002f       0x2c c:/program files/microchip/xc8/v2.45/avr/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr25/memx-const\libc.a(exit.o)
                                          0x2d (size before relaxing)
  .comment       0x000000000000005b       0x2d c:/program files/microchip/xc8/v2.45/avr/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr25/memx-const\libc.a(_Exit.o)
@@ -380,41 +411,48 @@ END GROUP
 .debug_sfnames
  *(.debug_sfnames)
 
-.debug_aranges  0x0000000000000000       0x50
+.debug_aranges  0x0000000000000000       0xf8
  *(.debug_aranges)
  .debug_aranges
-                0x0000000000000000       0x50 build/default/production/newavr-main.o
+                0x0000000000000000       0xb8 build/default/production/newavr-main.o
+ .debug_aranges
+                0x00000000000000b8       0x40 build/default/production/perif_control.o
 
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x0000000000000000      0xaba
+.debug_info     0x0000000000000000     0x152a
  *(.debug_info .gnu.linkonce.wi.*)
  .debug_info    0x0000000000000000      0x420 C:/Program Files/Microchip/MPLABX/v6.15/packs/Microchip/ATtiny_DFP/3.0.151/xc8/avr/lib/avr25/memx-const/crtattiny45.o
- .debug_info    0x0000000000000420      0x69a build/default/production/newavr-main.o
+ .debug_info    0x0000000000000420      0xe41 build/default/production/newavr-main.o
+ .debug_info    0x0000000000001261      0x2c9 build/default/production/perif_control.o
 
-.debug_abbrev   0x0000000000000000      0x5b8
+.debug_abbrev   0x0000000000000000      0x669
  *(.debug_abbrev)
  .debug_abbrev  0x0000000000000000      0x3e8 C:/Program Files/Microchip/MPLABX/v6.15/packs/Microchip/ATtiny_DFP/3.0.151/xc8/avr/lib/avr25/memx-const/crtattiny45.o
- .debug_abbrev  0x00000000000003e8      0x1d0 build/default/production/newavr-main.o
+ .debug_abbrev  0x00000000000003e8      0x23d build/default/production/newavr-main.o
+ .debug_abbrev  0x0000000000000625       0x44 build/default/production/perif_control.o
 
-.debug_line     0x0000000000000000      0x49d
+.debug_line     0x0000000000000000      0x81b
  *(.debug_line .debug_line.* .debug_line_end)
  .debug_line    0x0000000000000000       0xf5 C:/Program Files/Microchip/MPLABX/v6.15/packs/Microchip/ATtiny_DFP/3.0.151/xc8/avr/lib/avr25/memx-const/crtattiny45.o
- .debug_line    0x00000000000000f5      0x3a8 build/default/production/newavr-main.o
+ .debug_line    0x00000000000000f5      0x615 build/default/production/newavr-main.o
+ .debug_line    0x000000000000070a      0x111 build/default/production/perif_control.o
 
-.debug_frame    0x0000000000000000       0x94
+.debug_frame    0x0000000000000000      0x248
  *(.debug_frame)
- .debug_frame   0x0000000000000000       0x94 build/default/production/newavr-main.o
+ .debug_frame   0x0000000000000000      0x1e4 build/default/production/newavr-main.o
+ .debug_frame   0x00000000000001e4       0x64 build/default/production/perif_control.o
 
-.debug_str      0x0000000000000000      0x169
+.debug_str      0x0000000000000000      0x199
  *(.debug_str)
  .debug_str     0x0000000000000000      0x169 C:/Program Files/Microchip/MPLABX/v6.15/packs/Microchip/ATtiny_DFP/3.0.151/xc8/avr/lib/avr25/memx-const/crtattiny45.o
- .debug_str     0x0000000000000169        0x0 build/default/production/newavr-main.o
+ .debug_str     0x0000000000000169       0x30 build/default/production/newavr-main.o
+ .debug_str     0x0000000000000199        0x0 build/default/production/perif_control.o
 
-.debug_loc      0x0000000000000000      0x231
+.debug_loc      0x0000000000000000      0x278
  *(.debug_loc)
- .debug_loc     0x0000000000000000      0x231 build/default/production/newavr-main.o
+ .debug_loc     0x0000000000000000      0x278 build/default/production/newavr-main.o
 
 .debug_macinfo
  *(.debug_macinfo)
@@ -434,13 +472,14 @@ END GROUP
 .debug_pubtypes
  *(.debug_pubtypes)
 
-.debug_ranges   0x0000000000000000       0x40
+.debug_ranges   0x0000000000000000       0xd8
  *(.debug_ranges)
- .debug_ranges  0x0000000000000000       0x40 build/default/production/newavr-main.o
+ .debug_ranges  0x0000000000000000       0xa8 build/default/production/newavr-main.o
+ .debug_ranges  0x00000000000000a8       0x30 build/default/production/perif_control.o
 
 .debug_macro
  *(.debug_macro)
-OUTPUT(dist/default/production/PWMTest.X.production.elf elf32-avr)
+OUTPUT(dist/default/production/MPLab.production.elf elf32-avr)
 LOAD linker stubs
 LOAD data_init
 
@@ -449,97 +488,232 @@ LOAD data_init
  .note.gnu.avr.deviceinfo
                 0x0000000000000000       0x3c C:/Program Files/Microchip/MPLABX/v6.15/packs/Microchip/ATtiny_DFP/3.0.151/xc8/avr/lib/avr25/memx-const/crtattiny45.o
 
-.bss.timer1_flag
-                0x0000000000800060        0x1
- .bss.timer1_flag
+.bss.wake_flag  0x0000000000800060        0x1
+ .bss.wake_flag
                 0x0000000000800060        0x1 build/default/production/newavr-main.o
-                0x0000000000800060                timer1_flag
+                0x0000000000800060                wake_flag
 
-.bss.BURST_CHANGE
-                0x0000000000800061        0x1
- .bss.BURST_CHANGE
-                0x0000000000800061        0x1 build/default/production/newavr-main.o
-                0x0000000000800061                BURST_CHANGE
+.bss.MODE       0x0000000000800061        0x1
+ .bss.MODE      0x0000000000800061        0x1 build/default/production/newavr-main.o
+                0x0000000000800061                MODE
 
-.bss.IR_Cnt     0x0000000000800062        0x1
- .bss.IR_Cnt    0x0000000000800062        0x1 build/default/production/newavr-main.o
-                0x0000000000800062                IR_Cnt
-
-.bss.select_cnt
+.bss.timerWakeCnt
                 0x0000000000800063        0x1
- .bss.select_cnt
+ .bss.timerWakeCnt
                 0x0000000000800063        0x1 build/default/production/newavr-main.o
-                0x0000000000800063                select_cnt
+                0x0000000000800063                timerWakeCnt
 
-.bss.IR_MODE    0x0000000000800064        0x1
- .bss.IR_MODE   0x0000000000800064        0x1 build/default/production/newavr-main.o
-                0x0000000000800064                IR_MODE
+.bss.wakeup_activity
+                0x0000000000800064        0x1
+ .bss.wakeup_activity
+                0x0000000000800064        0x1 build/default/production/newavr-main.o
+                0x0000000000800064                wakeup_activity
 
-.text.main      0x0000000000000074      0x202
- .text.main     0x0000000000000074      0x202 build/default/production/newavr-main.o
-                0x0000000000000074                main
+.bss.timer0_wake
+                0x0000000000800065        0x1
+ .bss.timer0_wake
+                0x0000000000800065        0x1 build/default/production/newavr-main.o
+                0x0000000000800065                timer0_wake
 
-.text.__vector_4
-                0x0000000000000276       0x3a
- .text.__vector_4
-                0x0000000000000276       0x3a build/default/production/newavr-main.o
-                0x0000000000000276                __vector_4
+.bss.sample_B_TP64
+                0x0000000000800066        0x1
+ .bss.sample_B_TP64
+                0x0000000000800066        0x1 build/default/production/newavr-main.o
+                0x0000000000800066                sample_B_TP64
 
-.text.startTimer1
-                0x00000000000002b0       0x12
- .text.startTimer1
-                0x00000000000002b0       0x12 build/default/production/newavr-main.o
-                0x00000000000002b0                startTimer1
+.bss.sample_G_TP12
+                0x0000000000800067        0x1
+ .bss.sample_G_TP12
+                0x0000000000800067        0x1 build/default/production/newavr-main.o
+                0x0000000000800067                sample_G_TP12
 
-.text.exit      0x00000000000002c2        0xe
- .text.exit     0x00000000000002c2        0xe c:/program files/microchip/xc8/v2.45/avr/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr25/memx-const\libc.a(exit.o)
-                0x00000000000002c2                exit
+.bss.sample_R_TP63
+                0x0000000000800068        0x1
+ .bss.sample_R_TP63
+                0x0000000000800068        0x1 build/default/production/newavr-main.o
+                0x0000000000800068                sample_R_TP63
 
-.text           0x00000000000002d0        0x2
- .text          0x00000000000002d0        0x2 C:/Program Files/Microchip/MPLABX/v6.15/packs/Microchip/ATtiny_DFP/3.0.151/xc8/avr/lib/avr25/memx-const/crtattiny45.o
-                0x00000000000002d0                __vector_1
-                0x00000000000002d0                __vector_12
-                0x00000000000002d0                __bad_interrupt
-                0x00000000000002d0                __vector_6
-                0x00000000000002d0                __vector_11
-                0x00000000000002d0                __vector_13
-                0x00000000000002d0                __vector_7
-                0x00000000000002d0                __vector_5
-                0x00000000000002d0                __vector_2
-                0x00000000000002d0                __vector_8
-                0x00000000000002d0                __vector_14
-                0x00000000000002d0                __vector_10
+.text.main      0x0000000000000080      0x204
+ .text.main     0x0000000000000080      0x204 build/default/production/newavr-main.o
+                0x0000000000000080                main
+
+.text.startToggle
+                0x0000000000000284       0x56
+ .text.startToggle
+                0x0000000000000284       0x56 build/default/production/newavr-main.o
+                0x0000000000000284                startToggle
+
+.text.__vector_1
+                0x00000000000002da       0x4c
+ .text.__vector_1
+                0x00000000000002da       0x4c build/default/production/newavr-main.o
+                0x00000000000002da                __vector_1
+
+.text.__vector_2
+                0x0000000000000326       0x4c
+ .text.__vector_2
+                0x0000000000000326       0x4c build/default/production/newavr-main.o
+                0x0000000000000326                __vector_2
+
+.text.checkVolUp
+                0x0000000000000372       0x26
+ .text.checkVolUp
+                0x0000000000000372       0x26 build/default/production/newavr-main.o
+                0x0000000000000372                checkVolUp
+
+.text.checkVolDown
+                0x0000000000000398       0x26
+ .text.checkVolDown
+                0x0000000000000398       0x26 build/default/production/newavr-main.o
+                0x0000000000000398                checkVolDown
+
+.text.checkHighs
+                0x00000000000003be       0x24
+ .text.checkHighs
+                0x00000000000003be       0x24 build/default/production/newavr-main.o
+                0x00000000000003be                checkHighs
+
+.text.sampleGPIO
+                0x00000000000003e2       0x22
+ .text.sampleGPIO
+                0x00000000000003e2       0x22 build/default/production/newavr-main.o
+                0x00000000000003e2                sampleGPIO
+
+.text.sleepModePowerDown
+                0x0000000000000404       0x1c
+ .text.sleepModePowerDown
+                0x0000000000000404       0x1c build/default/production/newavr-main.o
+                0x0000000000000404                sleepModePowerDown
+
+.text.sleepModeIdle
+                0x0000000000000420       0x1a
+ .text.sleepModeIdle
+                0x0000000000000420       0x1a build/default/production/newavr-main.o
+                0x0000000000000420                sleepModeIdle
+
+.text.enable_PCINT
+                0x000000000000043a       0x18
+ .text.enable_PCINT
+                0x000000000000043a       0x18 build/default/production/newavr-main.o
+                0x000000000000043a                enable_PCINT
+
+.text.__vector_5
+                0x0000000000000452       0x14
+ .text.__vector_5
+                0x0000000000000452       0x14 build/default/production/newavr-main.o
+                0x0000000000000452                __vector_5
+
+.text.enable_INT0
+                0x0000000000000466       0x12
+ .text.enable_INT0
+                0x0000000000000466       0x12 build/default/production/newavr-main.o
+                0x0000000000000466                enable_INT0
+
+.text.armWakeUpInt
+                0x0000000000000478       0x12
+ .text.armWakeUpInt
+                0x0000000000000478       0x12 build/default/production/perif_control.o
+                0x0000000000000478                armWakeUpInt
+
+.text.testPinOut
+                0x000000000000048a       0x10
+ .text.testPinOut
+                0x000000000000048a       0x10 build/default/production/newavr-main.o
+                0x000000000000048a                testPinOut
+
+.text.startTimeout
+                0x000000000000049a        0xe
+ .text.startTimeout
+                0x000000000000049a        0xe build/default/production/newavr-main.o
+                0x000000000000049a                startTimeout
+
+.text.setTimer0
+                0x00000000000004a8        0xe
+ .text.setTimer0
+                0x00000000000004a8        0xe build/default/production/perif_control.o
+                0x00000000000004a8                setTimer0
+
+.text.exit      0x00000000000004b6        0xe
+ .text.exit     0x00000000000004b6        0xe c:/program files/microchip/xc8/v2.45/avr/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr25/memx-const\libc.a(exit.o)
+                0x00000000000004b6                exit
+
+.text.disable_INT0
+                0x00000000000004c4        0xc
+ .text.disable_INT0
+                0x00000000000004c4        0xc build/default/production/newavr-main.o
+                0x00000000000004c4                disable_INT0
+
+.text.disable_PCINT
+                0x00000000000004d0        0xc
+ .text.disable_PCINT
+                0x00000000000004d0        0xc build/default/production/newavr-main.o
+                0x00000000000004d0                disable_PCINT
+
+.text.disable_Timer0Int
+                0x00000000000004dc        0xc
+ .text.disable_Timer0Int
+                0x00000000000004dc        0xc build/default/production/newavr-main.o
+                0x00000000000004dc                disable_Timer0Int
+
+.text.setClock  0x00000000000004e8        0xa
+ .text.setClock
+                0x00000000000004e8        0xa build/default/production/perif_control.o
+                0x00000000000004e8                setClock
+
+.text.setPowerSavings
+                0x00000000000004f2        0x8
+ .text.setPowerSavings
+                0x00000000000004f2        0x8 build/default/production/perif_control.o
+                0x00000000000004f2                setPowerSavings
+
+.text.setGPIO   0x00000000000004fa        0x6
+ .text.setGPIO  0x00000000000004fa        0x6 build/default/production/perif_control.o
+                0x00000000000004fa                setGPIO
+
+.text           0x0000000000000500        0x2
+ .text          0x0000000000000500        0x2 C:/Program Files/Microchip/MPLABX/v6.15/packs/Microchip/ATtiny_DFP/3.0.151/xc8/avr/lib/avr25/memx-const/crtattiny45.o
+                0x0000000000000500                __vector_12
+                0x0000000000000500                __bad_interrupt
+                0x0000000000000500                __vector_6
+                0x0000000000000500                __vector_11
+                0x0000000000000500                __vector_13
+                0x0000000000000500                __vector_7
+                0x0000000000000500                __vector_4
+                0x0000000000000500                __vector_9
+                0x0000000000000500                __vector_8
+                0x0000000000000500                __vector_14
+                0x0000000000000500                __vector_10
 
 .text.__vector_3
-                0x00000000000002d2        0x2
+                0x0000000000000502        0x2
  .text.__vector_3
-                0x00000000000002d2        0x2 build/default/production/newavr-main.o
-                0x00000000000002d2                __vector_3
-
-.text.__vector_9
-                0x00000000000002d4        0x2
- .text.__vector_9
-                0x00000000000002d4        0x2 build/default/production/newavr-main.o
-                0x00000000000002d4                __vector_9
+                0x0000000000000502        0x2 build/default/production/newavr-main.o
+                0x0000000000000502                __vector_3
 
 .text.__dummy_fini
-                0x00000000000002d6        0x2
+                0x0000000000000504        0x2
  .text.__dummy_fini
-                0x00000000000002d6        0x2 c:/program files/microchip/xc8/v2.45/avr/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr25/memx-const\libc.a(exit.o)
-                0x00000000000002d6                _fini
+                0x0000000000000504        0x2 c:/program files/microchip/xc8/v2.45/avr/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr25/memx-const\libc.a(exit.o)
+                0x0000000000000504                _fini
 
 .text.__dummy_funcs_on_exit
-                0x00000000000002d8        0x2
+                0x0000000000000506        0x2
  .text.__dummy_funcs_on_exit
-                0x00000000000002d8        0x2 c:/program files/microchip/xc8/v2.45/avr/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr25/memx-const\libc.a(exit.o)
-                0x00000000000002d8                __funcs_on_exit
+                0x0000000000000506        0x2 c:/program files/microchip/xc8/v2.45/avr/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr25/memx-const\libc.a(exit.o)
+                0x0000000000000506                __funcs_on_exit
 
 .text.__dummy_simulator_exit
-                0x00000000000002da        0x2
+                0x0000000000000508        0x2
  .text.__dummy_simulator_exit
-                0x00000000000002da        0x2 c:/program files/microchip/xc8/v2.45/avr/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr25/memx-const\libc.a(exit.o)
-                0x00000000000002da                __simulator_exit
+                0x0000000000000508        0x2 c:/program files/microchip/xc8/v2.45/avr/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr25/memx-const\libc.a(exit.o)
+                0x0000000000000508                __simulator_exit
 
-.text._Exit     0x00000000000002dc        0x2
- .text._Exit    0x00000000000002dc        0x2 c:/program files/microchip/xc8/v2.45/avr/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr25/memx-const\libc.a(_Exit.o)
-                0x00000000000002dc                _Exit
+.text._Exit     0x000000000000050a        0x2
+ .text._Exit    0x000000000000050a        0x2 c:/program files/microchip/xc8/v2.45/avr/bin/../lib/gcc/avr/5.4.0/../../../../avr/lib/avr25/memx-const\libc.a(_Exit.o)
+                0x000000000000050a                _Exit
+
+.data.PREV_MODE
+                0x0000000000800062        0x1 load address 0x000000000000050c
+ .data.PREV_MODE
+                0x0000000000800062        0x1 build/default/production/newavr-main.o
+                0x0000000000800062                PREV_MODE

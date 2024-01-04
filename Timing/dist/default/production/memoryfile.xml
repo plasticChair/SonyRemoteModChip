@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?> 
 <project>                                  
-  <executable name="dist/default/production/PWMTest.X.production.elf">                 
+  <executable name="dist/default/production/MPLab.production.elf">                 
     <memory name="program">              
       <units>bytes</units>                 
       <length>4096</length>                 
-      <used>734</used>                     
-      <free>3362</free>                     
+      <used>1157</used>                     
+      <free>2939</free>                     
     </memory>                              
     <memory name="data">                 
       <units>bytes</units>                 
       <length>256</length>                 
-      <used>5</used>                     
-      <free>251</free>                     
+      <used>8</used>                     
+      <free>248</free>                     
     </memory>                              
   </executable>                            
 </project>                                 
