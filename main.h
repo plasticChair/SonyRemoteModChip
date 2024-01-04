@@ -28,58 +28,41 @@
 
 // This is a guard condition so that contents of this file are not included
 // more than once.  
-#ifndef HELPER_H
-#define	HELPER_H
+#ifndef MAIN_H
+#define	MAIN_H
+#include "helper.h"
+#include "perif_control.h"
 
-#include <stdint.h>
+//Main State List
+typedef enum  { ARM,
+                WAIT,
+                TIMER_WAKE,
+                TRIGGERED_WAKE,
+                WAIT_COND,
+                SENDING,
+                RESET
+                } MODE_LIST;
 
-
-
-#define T_output 4
-#define R_TP63 0
-#define G_TP12 2
-#define B_TP64 3
-
-
-// PWM List                
-typedef enum {
-            WAIT_IR,
-            ASSIGN,
-            NEXT_BYTE,
-            NEXT_BIT,
-            DATA_OUT,
-            LOGIC_LOW,
-            LOGIC_HIGH,
-}IR_MODE_LIST;
+// ------ Volatiles ------
+//  State Machine
+volatile uint8_t timerWakeCnt = 0;
+volatile MODE_LIST PREV_MODE = RESET;
+volatile MODE_LIST MODE = ARM;
+volatile uint8_t wake_flag = 0;
 
 
+// Prototypes
+void sleepModeIdle();
+void sleepModePowerDown();
 
+// PWM SM
+extern volatile uint8_t IR_Cnt;
+extern volatile uint8_t BURST_CHANGE;
+extern volatile uint8_t timer1_flag;
 
-
-
-
-
-
-
-uint8_t checkVolUp();
-uint8_t checkVolDown();
-uint8_t checkHighs();
-extern void sampleGPIO();
-extern void testPinOut(int state);
-
-void sendCMD();
-uint8_t sendingSM();
-
-void setModeStop();
-void setModeRunning();
-uint8_t getRunningMode();
-void initIRMode();
-
-extern void startTimer1();
-extern void stopTimer1();
-extern void setIRLow();
-extern void setIRHigh();
-
-extern void enable_Timer1Int();
-#endif	/* HELPER_H */
+extern void setModeStop();
+extern void setModeRunning();
+extern uint8_t getRunningMode();
+extern void initIRMode();
+#endif	/* MAIN_H */
 

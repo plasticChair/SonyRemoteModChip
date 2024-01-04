@@ -6,6 +6,7 @@
                    projectFiles="true">
       <itemPath>perif_control.h</itemPath>
       <itemPath>helper.h</itemPath>
+      <itemPath>main.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"

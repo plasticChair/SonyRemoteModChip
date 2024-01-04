@@ -29,7 +29,6 @@ IR_MODE_LIST IR_MODE = ASSIGN;
 uint8_t select_cnt = 0;
     
 volatile uint8_t STATE = 0;
-volatile uint8_t STATE2 = 0;
 volatile uint8_t IR_Cnt = 0;
 
 volatile uint8_t BURST_CHANGE = 0;
@@ -233,9 +232,7 @@ ISR(TIMER1_COMPB_vect)
 
 ISR(TIMER1_OVF_vect)
 {
-  //  STATE2 = !STATE2;
-  //  testPinOut(STATE2,PB0);
-   
+
     
     IR_Cnt++;
     if (IR_Cnt >= 21)
