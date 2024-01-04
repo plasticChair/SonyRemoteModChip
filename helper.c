@@ -1,12 +1,13 @@
-
 #include "helper.h"
+
+#define F_CPU 4000000
+#include <util/delay.h>
 
 uint8_t *cmdDataPtr;
 
 // PWM SM
-volatile uint8_t IR_Cnt;
-volatile uint8_t BURST_CHANGE;
-volatile uint8_t timer1_flag;
+
+extern volatile uint8_t BURST_CHANGE;
 
 IR_MODE_LIST IR_MODE;
 
@@ -16,11 +17,13 @@ uint8_t sample_G_TP12 = 0;
 uint8_t sample_B_TP64 = 0;
 
 #define DATA_SIZE 4
-uint8_t volUpMsg[DATA_SIZE]   = {0x7a,0xd5,0xaa,0xab};
-uint8_t volDownMsg[DATA_SIZE] = {0xF6,0xd5,0xaa,0xab};
+uint8_t volUpMsg[DATA_SIZE]   = {0xF5,0xAB,0x55,0x56};
+uint8_t volDownMsg[DATA_SIZE] = {0xED,0xAB,0x55,0x56};
+
 
 uint8_t runningFlag = 0;
-uint8_t stopFlag = 1;
+volatile uint8_t executeFlag = 0;
+uint8_t stopFlag = 0;
 //--------------------------------//
 // DIO Sampling
 uint8_t checkVolUp()
@@ -45,29 +48,29 @@ uint8_t checkHighs()
 }
 
 
-
 void sendCMD()
 {
     setTimer1();
     enable_Timer1Int();
-    IR_Cnt = 0;
+    setIRCnt( 0);
     BURST_CHANGE = 0;
-    timer1_flag = 0;
     initIRMode();
     
     if (checkVolUp()){
        cmdDataPtr = volUpMsg;
     }
     else{
-       cmdDataPtr = volUpMsg;
+       cmdDataPtr = volDownMsg;
     }
 }
 
 void setModeRunning()
 {
+
     if (IR_MODE == WAIT_IR){
         IR_MODE = ASSIGN;
         stopFlag = 0;
+        setExecuteFlag();
     }
     
 }
@@ -75,11 +78,39 @@ void setModeRunning()
 void setModeStop()
 {
     stopFlag = 1;
+    IR_MODE = WAIT_IR;
 }
 uint8_t getRunningMode()
 {
     return runningFlag;
 }
+
+uint8_t checkRunningMode()
+{
+    return (IR_MODE != WAIT_IR);
+}
+
+void setRunningFlag()
+{
+    runningFlag = 1;
+}
+
+void setExecuteFlag()
+{
+    executeFlag = 1;
+}
+
+void clearExecuteFlag()
+{
+    executeFlag = 0;
+}
+
+
+uint8_t getExecuteFlag()
+{
+    return executeFlag;
+}
+
 
 void initIRMode()
 {
@@ -89,30 +120,41 @@ void initIRMode()
 uint8_t sendingSM()
 {
     static uint8_t data_byte_idx = 0;
-    static uint8_t data_bit_idx = 0;
+    static int8_t data_bit_idx = 8;
     static uint8_t curr_byte = 0;
     
     uint8_t curr_bit = 0;
     uint8_t Low_Length = 0;
     
 
-    
+  /*
     if (IR_MODE != WAIT_IR)
     {
-        IRPinOut(1); 
+        IRPinOut(1); IRPinOut(0); 
   
-        runningFlag = 1;
-        timer1_flag = 0;
+        if (runningFlag == 0)
+        {
+            //startTimer1();
+            setIRHigh();
+            runningFlag = 1;
+        }
+        
+        executeFlag = 0;
+
+        
         if (stopFlag == 1)
         {
             IRPinOut(0);
             IR_MODE = WAIT_IR;
             runningFlag = 0;
-            //setIRLow();
+            //stopTimer1();
+            setIRLow();
         }
-        return;
+        
     }
-    
+    return;
+    */
+    clearExecuteFlag();
     switch (IR_MODE)
     {
         case WAIT_IR:
@@ -122,65 +164,73 @@ uint8_t sendingSM()
             
         case ASSIGN:
             runningFlag = 1;
+            testPinOut(1); testPinOut(0);
+            testPinOut(1); testPinOut(0);
+            testPinOut(1); testPinOut(0);
+                
             startTimer1();
+            BURST_CHANGE = 0;
+            setIRCnt(0);
             IR_MODE = NEXT_BYTE;
-             setIRLow();
+            data_byte_idx = 0;
             /*Fall through*/
 
         case NEXT_BYTE:
            // Check if reached end of data
-            curr_byte = *(cmdDataPtr + data_bit_idx);
-            if (data_byte_idx > (DATA_SIZE-1)){
+
+            if (data_byte_idx >= (DATA_SIZE)){
                 setIRLow();
                 data_byte_idx = 0;
-                if (stopFlag != 1){
-                    IR_MODE  = ASSIGN;
-                }
-                else
-                {
-                    IR_MODE  = WAIT_IR;
-                }
+                IR_MODE  = WAIT_IR;
+                stopTimer1();
+                setExecuteFlag();
+                return 1;
+
                 break;
             }
             else{
+                curr_byte = *(cmdDataPtr + data_byte_idx);
                 data_byte_idx++;
             }
-            testPinOut(1); testPinOut(0);
-            testPinOut(1); testPinOut(0);
+
             BURST_CHANGE = 0;
-            data_bit_idx = 7;
+            setIRCnt(0) ;
+            data_bit_idx = 8;
             IR_MODE      = NEXT_BIT;
             /*Fall through*/
 
         case NEXT_BIT:
             // Check if all 8 bits are done
+            data_bit_idx--;
             if (data_bit_idx < 0){
-                IR_MODE = WAIT_IR;
-                //timer1_flag  = 1; // Force Loop again
-                return 1;
+                IR_MODE = NEXT_BYTE;
+                setExecuteFlag(); // Force Loop again
+
+                //return 1;
                 break;
             }
             else{
                 // Get single bit
                 curr_bit =  (curr_byte >> data_bit_idx) & 1;
-                data_bit_idx--;
-
-                if (curr_bit == 1){
-                    IR_MODE = LOGIC_HIGH;
-                }
-                else{
-                    IR_MODE = LOGIC_LOW;
-                }
             }
+            
 
             // Reset Vals
             BURST_CHANGE = 0;
-            IR_Cnt       = 0;
-            stopTimer1();
-            startTimer1();
-            timer1_flag  = 1; // Force Loop again
-
-            break;
+            setIRCnt(0);
+            //stopTimer1();
+            //startTimer1();
+            
+            
+            if (curr_bit == 1){
+                IR_MODE = LOGIC_HIGH;
+                /*Fall through*/
+            }
+            else{
+                IR_MODE = LOGIC_LOW;
+                setExecuteFlag(); // Force Loop again
+                break;
+            }
 
         case LOGIC_HIGH:
             //OUT HIGH
@@ -191,7 +241,7 @@ uint8_t sendingSM()
         case LOGIC_LOW:
 
             //OUT LOW
-            setIRLow();
+             setIRLow();
 
              IR_MODE = NEXT_BIT;
             break;
