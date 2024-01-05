@@ -108,6 +108,8 @@ void sleepModePowerDown() {
     // Set sleep mode to Power Down
     //SLEEP_MODE_IDLE
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+    
+  //  DDRB = 0;
     sei(); 
     // Enable sleep
     sleep_enable();

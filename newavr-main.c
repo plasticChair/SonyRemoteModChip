@@ -5,6 +5,9 @@
  * Created on December 30, 2023, 9:47 PM
  */
 #define F_CPU 4000000
+
+#define CLK_SPD  4   //1 = 4 Mhz
+                    // 4 = 1 Mhz
 #include <util/delay.h>
 
 #include "main.h"
@@ -55,10 +58,9 @@ int main(void) {
 
         
                         sleepModePowerDown();
+                        //setGPIO();
                          testPinOut(1);  _delay_us(160);testPinOut(0);
-   
         
-
                         if (MODE != TIMER_WAKE){
                             MODE = WAIT_COND;
                             /* Fall through */
